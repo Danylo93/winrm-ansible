@@ -1,0 +1,25 @@
+- name: Configurar IIS no Windows
+  hosts: win
+  gather_facts: false
+  tasks:
+    - name: Instalar IIS
+      win_feature:
+        name: Web-Server
+        state: present
+
+    - name: Criar diretório do site
+      win_file:
+        path: C:\inetpub\meusite
+        state: directory
+
+    - name: Publicar site
+      win_copy:
+        content: "<h1>Site publicado via Ansible!</h1>"
+        dest: C:\inetpub\meusite\index.html
+
+    - name: Criar site no IIS
+      win_iis_website:
+        name: "SiteAnsible"
+        state: started
+        physical_path: C:\inetpub\meusite
+        port: 80

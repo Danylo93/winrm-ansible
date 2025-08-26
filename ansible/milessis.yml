@@ -1,0 +1,58 @@
+- name: Configurar IIS para o site Milessis
+  hosts: win
+  gather_facts: false
+
+  vars:
+    user_iis: "ua.milessis.user@az.local"
+    password_iis: "86b7fef@eWt43rpas@"
+    site_name: "www.argoit.com.br"
+    classic_pool: "milessis.classic"
+    nextgen_pool: "milessis.nextgen"
+    classic_path: "\\fileserverus\Aplicacoes\useargo\tmsweb\tms_argo09"
+    nextgen_path: "\\fileserverus\Aplicacoes\useargo\argoweb\nx_argo09"
+
+  tasks:
+
+    - name: Criar Application Pool - classic
+      win_iis_webapppool:
+        name: "{{ classic_pool }}"
+        state: started
+
+    - name: Criar Application Pool - nextgen
+      win_iis_webapppool:
+        name: "{{ nextgen_pool }}"
+        state: started
+
+    - name: Configurar credenciais do Pool classic
+      win_iis_webapppool_settings:
+        name: "{{ classic_pool }}"
+        attributes:
+          processModel.identityType: 3
+          processModel.userName: "{{ user_iis }}"
+          processModel.password: "{{ password_iis }}"
+          processModel.idleTimeout: "20:00:00"
+
+    - name: Configurar credenciais do Pool nextgen
+      win_iis_webapppool_settings:
+        name: "{{ nextgen_pool }}"
+        attributes:
+          processModel.identityType: 3
+          processModel.userName: "{{ user_iis }}"
+          processModel.password: "{{ password_iis }}"
+          processModel.idleTimeout: "20:00:00"
+
+    - name: Criar aplicação /milessis
+      win_iis_webapplication:
+        name: "milessis"
+        site: "{{ site_name }}"
+        physical_path: "{{ classic_path }}"
+        application_pool: "{{ classic_pool }}"
+        state: started
+
+    - name: Criar aplicação /milessis/nx
+      win_iis_webapplication:
+        name: "milessis/nx"
+        site: "{{ site_name }}"
+        physical_path: "{{ nextgen_path }}"
+        application_pool: "{{ nextgen_pool }}"
+        state: started

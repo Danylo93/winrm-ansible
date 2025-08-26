@@ -1,0 +1,9 @@
+win:
+  hosts:
+    vmwin:
+      ansible_host: IP_DA_VM
+      ansible_user: azureuser
+      ansible_password: SenhaForte123!
+      ansible_connection: winrm
+      ansible_winrm_transport: basic
+      ansible_winrm_server_cert_validation: ignore

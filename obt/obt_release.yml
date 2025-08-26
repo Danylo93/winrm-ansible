@@ -1,0 +1,62 @@
+- name: Release semanal do OBT
+  hosts: win
+  gather_facts: false
+  vars:
+    site_name: "OBT"
+    app_pool: "OBTAppPool"
+    release_path: "C:\\inetpub\\wwwroot\\OBT"
+    backup_path: "C:\\releases\\backup\\{{ ansible_date_time.date }}"
+    new_release_path: "\\\\buildserver\\releases\\obt\\latest"
+
+  tasks:
+
+    - name: Parar App Pool do OBT
+      win_iis_webapppool:
+        name: "{{ app_pool }}"
+        state: stopped
+
+    - name: Criar backup da release atual
+      win_command: powershell Copy-Item -Recurse -Force "{{ release_path }}" "{{ backup_path }}"
+      ignore_errors: true
+
+    - name: Apagar arquivos antigos
+      win_file:
+        path: "{{ release_path }}"
+        state: absent
+
+    - name: Criar diretório novamente
+      win_file:
+        path: "{{ release_path }}"
+        state: directory
+
+    - name: Copiar nova release
+      win_command: powershell Copy-Item -Recurse -Force "{{ new_release_path }}\\*" "{{ release_path }}"
+
+    - name: Verificar se Kafka está online (ping simples na porta)
+      win_uri:
+        url: http://kafka-server:9092
+        method: GET
+        return_content: no
+      register: kafka_check
+      failed_when: kafka_check.status not in [200, 403]
+
+    - name: Iniciar App Pool do OBT
+      win_iis_webapppool:
+        name: "{{ app_pool }}"
+        state: started
+
+    - name: Disparar pipeline do Azure DevOps
+      uri:
+        url: "https://dev.azure.com/{{ org }}/{{ project }}/_apis/pipelines/{{ pipeline_id }}/runs?api-version=7.0"
+        method: POST
+        headers:
+          Authorization: "Basic {{ azure_pat | b64encode }}"
+          Content-Type: "application/json"
+        body_format: json
+        body:
+          resources:
+            repositories:
+              self:
+                refName: refs/heads/main
+      delegate_to: localhost
+
