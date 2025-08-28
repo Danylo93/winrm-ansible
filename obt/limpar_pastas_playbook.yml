@@ -1,0 +1,162 @@
+---
+- name: Limpar pastas conforme o script original (com logs por task)
+  hosts: win
+  gather_facts: false
+
+  vars:
+    limpezas:
+      # Alatur
+      - { name: "nx_alatur",      pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_alatur",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_alatur",     pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_alatur",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      # Alatur02
+      - { name: "nx_alatur02",    pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_alatur02",    exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_alatur02",   pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_alatur02",    exc: ["images","Web.config","ApplicationInsights.config"] }
+      # Argo01..11
+      - { name: "nx_argo01",      pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_argo01",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_argo01",     pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_argo01",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "nx_argo02",      pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_argo02",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_argo02",     pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_argo02",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "nx_argo03",      pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_argo03",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_argo03",     pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_argo03",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "nx_argo04",      pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_argo04",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_argo04",     pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_argo04",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "nx_argo05",      pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_argo05",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_argo05",     pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_argo05",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "nx_argo06",      pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_argo06",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_argo06",     pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_argo06",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "nx_argo07",      pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_argo07",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_argo07",     pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_argo07",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "nx_argo08",      pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_argo08",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_argo08",     pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_argo08",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "nx_argo09",      pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_argo09",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_argo09",     pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_argo09",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "nx_argo10",      pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_argo10",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_argo10",     pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_argo10",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "nx_argo11",      pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_argo11",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_argo11",     pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_argo11",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      # Avipam
+      - { name: "nx_avipam",      pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_avipam",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_avipam",     pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_avipam",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      # BCD
+      - { name: "nx_bcd",         pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_bcd",         exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_bcd",        pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_bcd",         exc: ["images","Web.config","ApplicationInsights.config"] }
+      # BNDES
+      - { name: "nx_bndes",       pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_bndes",       exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_bndes",      pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_bndes",       exc: ["images","Web.config","ApplicationInsights.config"] }
+      # BTMViagens
+      - { name: "nx_btmviagens",  pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_btmviagens",  exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_btmviagens", pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_btmviagens",  exc: ["images","Web.config","ApplicationInsights.config"] }
+      # Copastur
+      - { name: "nx_copastur",    pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_copastur",    exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_copastur",   pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_copastur",    exc: ["images","Web.config","ApplicationInsights.config"] }
+      # CWT
+      - { name: "nx_cwt",         pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_cwt",         exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_cwt",        pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_cwt",         exc: ["images","Web.config","ApplicationInsights.config"] }
+      # Flytour
+      - { name: "nx_flytour",     pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_flytour",     exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_flytour",    pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_flytour",     exc: ["images","Web.config","ApplicationInsights.config"] }
+      # Flytour02
+      - { name: "nx_flytour02",   pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_flytour02",   exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_flytour02",  pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_flytour02",   exc: ["images","Web.config","ApplicationInsights.config"] }
+      # ITM
+      - { name: "nx_itm",         pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_itm",         exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_itm",        pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_itm",         exc: ["images","Web.config","ApplicationInsights.config"] }
+      # Latam
+      - { name: "nx_latam",       pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_latam",       exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_latam",      pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_latam",       exc: ["images","Web.config","ApplicationInsights.config"] }
+      # Latam02
+      - { name: "nx_latam02",     pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_latam02",     exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_latam02",    pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_latam02",     exc: ["images","Web.config","ApplicationInsights.config"] }
+      # Latam03
+      - { name: "nx_latam03",     pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_latam03",     exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_latam03",    pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_latam03",     exc: ["images","Web.config","ApplicationInsights.config"] }
+      # Tourhouse
+      - { name: "nx_tourhouse",   pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_tourhouse",   exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_tourhouse",  pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_tourhouse",   exc: ["images","Web.config","ApplicationInsights.config"] }
+      # Stravel
+      - { name: "nx_stravel",     pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_stravel",     exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "tms_stravel",    pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_stravel",     exc: ["images","Web.config","ApplicationInsights.config"] }
+      # Suporte
+      - { name: "nx_suporte",     pasta: "F:\\Dev.publicacoes\\suporte.useargo.com\\nx_suporte",  exc: ["ApplicationInsights.config"] }
+      - { name: "tms_suporte",    pasta: "F:\\Dev.publicacoes\\suporte.useargo.com\\tms_suporte", exc: ["ApplicationInsights.config"] }
+      # Kiu (diversos)
+      - { name: "tms_kiu_amexgbtco",            pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_kiu_amexgbtco",            exc: ["ApplicationInsights.config"] }
+      - { name: "tms_kiu_bauser",               pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_kiu_bauser",               exc: ["ApplicationInsights.config"] }
+      - { name: "tms_kiu_costabrava",           pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_kiu_costabrava",           exc: ["ApplicationInsights.config"] }
+      - { name: "tms_kiu_costamarcorp",         pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_kiu_costamarcorp",         exc: ["ApplicationInsights.config"] }
+      - { name: "tms_kiu_egencia",              pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_kiu_egencia",              exc: ["ApplicationInsights.config"] }
+      - { name: "tms_kiu_megatours",            pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_kiu_megatours",            exc: ["ApplicationInsights.config"] }
+      - { name: "tms_kiu_neptunoviajes",        pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_kiu_neptunoviajes",        exc: ["ApplicationInsights.config"] }
+      - { name: "tms_kiu_nuevomundoviajes",     pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_kiu_nuevomundoviajes",     exc: ["ApplicationInsights.config"] }
+      - { name: "tms_kiu_obtneptuno-corporativo", pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_kiu_obtneptuno-corporativo", exc: ["ApplicationInsights.config"] }
+      - { name: "tms_kiu_rumbosagenciadeviajes", pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_kiu_rumbosagenciadeviajes", exc: ["ApplicationInsights.config"] }
+      - { name: "tms_kiu_tourexito",            pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_kiu_tourexito",            exc: ["ApplicationInsights.config"] }
+      - { name: "tms_kiu_trafalgar",            pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_kiu_trafalgar",            exc: ["ApplicationInsights.config"] }
+      - { name: "tms_kiu_vecico",               pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_kiu_vecico",               exc: ["ApplicationInsights.config"] }
+      - { name: "tms_kiu_wings",                pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_kiu_wings",                exc: ["ApplicationInsights.config"] }
+      - { name: "tms_kiu_wt",                   pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_kiu_wt",                   exc: ["ApplicationInsights.config"] }
+
+  tasks:
+
+    - name: "Limpeza ➜ {{ item.name }}"
+      ansible.windows.win_powershell:
+        parameters:
+          Path: "{{ item.pasta }}"
+          Exceptions: "{{ item.exc }}"
+        script: |
+          param(
+            [string]$Path,
+            [string[]]$Exceptions
+          )
+
+          if (-not (Test-Path -LiteralPath $Path)) {
+            Write-Output "PATH NOT FOUND: $Path"
+            return
+          }
+
+          $deleted = 0
+          $skipped = 0
+          $errors  = 0
+
+          Write-Output "== START CLEAN == `$Path: $Path"
+          Write-Output "Exceptions: $($Exceptions -join ', ')"
+
+          try {
+            $entries = Get-ChildItem -LiteralPath $Path -Force
+          } catch {
+            Write-Output "ERROR: cannot list items in $Path -> $($_.Exception.Message)"
+            throw
+          }
+
+          foreach ($entry in $entries) {
+            $name = $entry.Name
+            if ($Exceptions -contains $name) {
+              Write-Output "SKIP : $name"
+              $skipped++
+              continue
+            }
+
+            try {
+              Remove-Item -LiteralPath $entry.FullName -Recurse -Force -ErrorAction Stop
+              Write-Output "DELETE: $name"
+              $deleted++
+            } catch {
+              Write-Output "ERROR: $name -> $($_.Exception.Message)"
+              $errors++
+            }
+          }
+
+          Write-Output ("SUMMARY: deleted={0} skipped={1} errors={2}" -f $deleted, $skipped, $errors)
+      loop: "{{ limpezas }}"
+      loop_control:
+        label: "{{ item.name }} ({{ item.pasta }})"
+      register: limpeza_result
+
+      # marca a task como "changed" se deletou algo
+      changed_when: "limpeza_result.stdout is search('SUMMARY: deleted=([1-9]\\d*)')"
+      failed_when: limpeza_result.rc is defined and limpeza_result.rc != 0
+      no_log: false  # garante que os logs apareçam na saída
+
+    - name: Resumo geral das limpezas (coletado)
+      ansible.builtin.debug:
+        msg: "{{ limpeza_result.stdout_lines | default([]) }}"

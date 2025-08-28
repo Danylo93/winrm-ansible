@@ -1,0 +1,11 @@
+---
+- name: Ensure HTTPS binding (when enabled)
+  community.windows.win_iis_webbinding:
+    name: "{{ site.name }}"
+    protocol: https
+    port: "{{ site.https_port | default(443) }}"
+    ip: "{{ site.ip | default('*') }}"
+    host_header: "{{ site.hostname }}"
+    certificate_hash: "{{ site.cert_thumbprint }}"
+    certificate_store_name: "{{ site.cert_store_name | default('WebHosting') }}"
+    state: present

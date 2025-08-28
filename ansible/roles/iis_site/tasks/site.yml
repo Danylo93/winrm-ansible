@@ -1,0 +1,14 @@
+---
+- name: Ensure placeholder folder exists
+  ansible.windows.win_file:
+    path: "C:\\inetpub\\wwwroot\\_placeholder"
+    state: directory
+
+- name: Ensure website exists and started
+  community.windows.win_iis_website:
+    name: "{{ site.name }}"
+    state: started
+    physical_path: "C:\\inetpub\\wwwroot\\_placeholder"
+    ip: "{{ site.ip | default('*') }}"
+    port: "{{ site.http_port | default(80) }}"
+    hostname: "{{ site.hostname }}"

@@ -1,0 +1,10 @@
+---
+- name: Publish applications
+  community.windows.win_iis_webapplication:
+    name: "{{ item.path | regex_replace('^/', '') }}"
+    site: "{{ site.name }}"
+    physical_path: "{{ (item.physical == 'classic') | ternary(classic_physical_path, nextgen_physical_path) }}"
+    application_pool: "{{ item.pool }}"
+    state: present
+  loop: "{{ site.apps }}"
+  notify: "restart iis"

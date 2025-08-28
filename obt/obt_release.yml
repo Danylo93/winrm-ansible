@@ -5,18 +5,36 @@
     site_name: "OBT"
     app_pool: "OBTAppPool"
     release_path: "C:\\inetpub\\wwwroot\\OBT"
-    backup_path: "C:\\releases\\backup\\{{ ansible_date_time.date }}"
+    backup_root: "C:\\releases\\backup"
     new_release_path: "\\\\buildserver\\releases\\obt\\latest"
+    azure_pat: "SEU_PAT_AQUI"  
+    org: "SEU_ORG"
+    project: "SEU_PROJETO"
+    pipeline_id: "123"
 
   tasks:
+
+    - name: Definir data atual como string simples
+      set_fact:
+        data_release: "{{ lookup('pipe', 'date +%Y-%m-%d') }}"
+
+    - name: Criar caminho final do backup
+      set_fact:
+        backup_path: "{{ backup_root }}\\{{ data_release }}"
 
     - name: Parar App Pool do OBT
       win_iis_webapppool:
         name: "{{ app_pool }}"
         state: stopped
 
-    - name: Criar backup da release atual
+    - name: Verificar se release_path existe
+      win_stat:
+        path: "{{ release_path }}"
+      register: release_dir
+
+    - name: Criar backup da release atual (se existir)
       win_command: powershell Copy-Item -Recurse -Force "{{ release_path }}" "{{ backup_path }}"
+      when: release_dir.stat.exists
       ignore_errors: true
 
     - name: Apagar arquivos antigos
@@ -32,25 +50,21 @@
     - name: Copiar nova release
       win_command: powershell Copy-Item -Recurse -Force "{{ new_release_path }}\\*" "{{ release_path }}"
 
-    - name: Verificar se Kafka está online (ping simples na porta)
-      win_uri:
-        url: http://kafka-server:9092
-        method: GET
-        return_content: no
-      register: kafka_check
-      failed_when: kafka_check.status not in [200, 403]
-
     - name: Iniciar App Pool do OBT
       win_iis_webapppool:
         name: "{{ app_pool }}"
         state: started
+
+    - name: Codificar PAT para autenticação
+      set_fact:
+        encoded_pat: "{{ ':{0}'.format(azure_pat) | b64encode }}"
 
     - name: Disparar pipeline do Azure DevOps
       uri:
         url: "https://dev.azure.com/{{ org }}/{{ project }}/_apis/pipelines/{{ pipeline_id }}/runs?api-version=7.0"
         method: POST
         headers:
-          Authorization: "Basic {{ azure_pat | b64encode }}"
+          Authorization: "Basic {{ encoded_pat }}"
           Content-Type: "application/json"
         body_format: json
         body:
@@ -59,4 +73,3 @@
               self:
                 refName: refs/heads/main
       delegate_to: localhost
-

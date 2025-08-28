@@ -1,6 +1,8 @@
 provider "azurerm" {
   features {}
+  subscription_id = "78e6baa7-cd2b-40cc-8484-97f27ba94b04"
 }
+
 
 resource "azurerm_resource_group" "rg" {
   name     = "rg-ansible-winrm"
@@ -48,16 +50,17 @@ resource "azurerm_network_security_group" "nsg" {
   resource_group_name = azurerm_resource_group.rg.name
 
   security_rule {
-    name                       = "AllowWinRM"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "5985"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
+  name                       = "AllowRDP"
+  priority                   = 110
+  direction                  = "Inbound"
+  access                     = "Allow"
+  protocol                   = "Tcp"
+  source_port_range          = "*"
+  destination_port_range     = "3389"
+  source_address_prefix      = "*"
+  destination_address_prefix = "*"
+}
+
 }
 
 resource "azurerm_network_interface_security_group_association" "nsg_assoc" {
@@ -66,7 +69,7 @@ resource "azurerm_network_interface_security_group_association" "nsg_assoc" {
 }
 
 resource "azurerm_windows_virtual_machine" "vm" {
-  name                = "vm-ansible-winrm"
+  name                = "vm-ansible-01"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   size                = "Standard_B2ms"
@@ -87,7 +90,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
     version   = "latest"
   }
 
-  custom_data = base64encode(file("terraform/winrm-init.ps1"))
+  custom_data = base64encode(file("./winrm-init.ps1"))
 }
 
 output "public_ip" {

@@ -1,0 +1,4 @@
+---
+- name: restart iis
+  ansible.windows.win_shell: iisreset
+  listen: "restart iis"

@@ -1,0 +1,9 @@
+---
+- name: Ensure HTTP binding
+  community.windows.win_iis_webbinding:
+    name: "{{ site.name }}"
+    protocol: http
+    port: "{{ site.http_port | default(80) }}"
+    ip: "{{ site.ip | default('*') }}"
+    host_header: "{{ site.hostname }}"
+    state: present

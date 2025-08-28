@@ -1,0 +1,36 @@
+---
+- name: Ping Windows
+  ansible.windows.win_ping:
+
+- name: Ensure IIS features present
+  ansible.windows.win_feature:
+    name:
+      - Web-Server
+      - Web-WebServer
+      - Web-Common-Http
+      - Web-Default-Doc
+      - Web-Static-Content
+      - Web-Http-Errors
+      - Web-Filtering
+      - Web-Performance
+      - Web-Stat-Compression
+      - Web-ISAPI-Ext
+      - Web-ISAPI-Filter
+      - Web-Asp-Net45
+      - Web-Net-Ext45
+      - Web-Mgmt-Service
+      - Web-Mgmt-Tools
+      - Web-Scripting-Tools
+    state: present
+    include_sub_features: true
+
+- name: Open Windows Firewall 80 (optional)
+  when: (open_http_firewall | default(true))
+  ansible.windows.win_firewall_rule:
+    name: "IIS HTTP In"
+    localport: 80
+    action: allow
+    direction: in
+    protocol: tcp
+    state: present
+    enabled: yes

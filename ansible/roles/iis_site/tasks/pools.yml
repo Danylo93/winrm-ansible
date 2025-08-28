@@ -1,0 +1,13 @@
+---
+- name: Ensure app pools
+  community.windows.win_iis_webapppool:
+    name: "{{ item.name }}"
+    state: started
+    managed_runtime_version: "{{ site.managed_runtime | default('v4.0') }}"
+    managed_pipeline_mode: "{{ site.pipeline_mode | default('Integrated') }}"
+    start_mode: "{{ site.start_mode | default('AlwaysRunning') }}"
+    auto_start: true
+    attributes:
+      processModel.identityType: 4
+      recycling.periodicRestart.time: "00:00:00"
+  loop: "{{ site.pools }}"

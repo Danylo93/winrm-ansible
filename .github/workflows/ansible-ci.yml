@@ -1,0 +1,23 @@
+name: ansible-ci
+on: [push, pull_request]
+jobs:
+  lint-and-dryrun:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - name: Install Ansible + linters
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible-core ansible-lint yamllint
+          ansible-galaxy collection install -r ansible/collections/requirements.yml
+      - name: Lint
+        run: |
+          yamllint ansible
+          ansible-lint ansible
+      - name: Dry-run (check-mode) - dev
+        run: |
+          cd ansible
+          ansible-playbook -i inventories/dev/hosts.yml playbooks/deploy_iis.yml --check -e "ansible_winrm_server_cert_validation=ignore"

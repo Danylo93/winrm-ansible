@@ -1,0 +1,143 @@
+- name: Deploy app .NET Core com Kafka para teste
+  hosts: win
+  gather_facts: false
+  vars:
+    projeto: "KafkaExample"
+    app_dir: "C:\\KafkaTest"
+    bootstrap_servers: "localhost:9092"   # ajuste para IP real do Kafka se necessário
+    topic: "test-topic"
+    log_dir: "C:\\KafkaTest\\KafkaExample\\logs"
+    log_file_path: "C:\\KafkaTest\\KafkaExample\\logs\\app.log"
+
+  tasks:
+    - name: Criar pasta do projeto
+      win_file:
+        path: "{{ app_dir }}"
+        state: directory
+
+    - name: Criar diretório C:\Temp se não existir
+      win_file:
+        path: C:\Temp
+        state: directory
+
+    - name: Baixar instalador do .NET Framework 4.8
+      win_get_url:
+        url: https://download.visualstudio.microsoft.com/download/pr/2d6bb6b2-226a-4baa-bdec-798822606ff1/8494001c276a4b96804cde7829c04d7f/ndp48-x86-x64-allos-enu.exe
+        dest: C:\Temp\ndp48.exe
+
+    - name: Instalar .NET Framework 4.8 via comando
+      win_command: C:\Temp\ndp48.exe /quiet /norestart
+
+    - name: Baixar script de instalação do .NET SDK 6.0
+      win_shell: |
+        Invoke-WebRequest -Uri "https://dot.net/v1/dotnet-install.ps1" -OutFile "$env:TEMP\dotnet-install.ps1"
+      args:
+        executable: powershell.exe
+
+    - name: Instalar .NET SDK 6.0
+      win_shell: |
+        powershell -ExecutionPolicy Bypass -File "$env:TEMP\dotnet-install.ps1" -Channel 6.0 -InstallDir "C:\Dotnet"
+      args:
+        executable: powershell.exe
+
+    - name: Criar projeto webapi (com --force)
+      win_command: "C:\\Dotnet\\dotnet.exe new webapi -n {{ projeto }} --force"
+      args:
+        chdir: "{{ app_dir }}"
+
+    - name: Adicionar Confluent.Kafka
+      win_command: "C:\\Dotnet\\dotnet.exe add package Confluent.Kafka"
+      args:
+        chdir: "{{ app_dir }}\\{{ projeto }}"
+
+    - name: Substituir Program.cs com integração Kafka
+      win_copy:
+        dest: "{{ app_dir }}\\{{ projeto }}\\Program.cs"
+        content: |
+          using Confluent.Kafka;
+
+          var builder = WebApplication.CreateBuilder(args);
+          builder.Services.AddSingleton<KafkaProducerService>();
+          var app = builder.Build();
+
+          app.MapGet("/send", async (string msg, KafkaProducerService kafka) =>
+          {
+              await kafka.SendMessageAsync(msg);
+              return Results.Ok($"Mensagem enviada: {msg}");
+          });
+
+          app.Run();
+
+          public class KafkaProducerService
+          {
+              private readonly IProducer<Null, string> _producer;
+              private readonly string _topic = "{{ topic }}";
+
+              public KafkaProducerService()
+              {
+                  var config = new ProducerConfig { BootstrapServers = "{{ bootstrap_servers }}" };
+                  _producer = new ProducerBuilder<Null, string>(config).Build();
+              }
+
+              public async Task SendMessageAsync(string message)
+              {
+                  await _producer.ProduceAsync(_topic, new Message<Null, string> { Value = message });
+              }
+          }
+
+    - name: Criar pasta de logs se não existir
+      win_file:
+        path: "{{ app_dir }}\\{{ projeto }}\\logs"
+        state: directory
+
+    - name: Gerar timestamp atual (YYYY-MM-DD_HH-mm-ss)
+      win_shell: |
+        Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
+      register: timestamp_output
+
+    - name: Definir nome completo do log com timestamp
+      set_fact:
+        timestamp: "{{ timestamp_output.stdout }}"
+        log_file_path_dynamic: "{{ log_dir }}\\app_{{ timestamp_output.stdout }}.log"
+
+
+    - name: Rodar aplicação .NET Core e salvar logs (background)
+      win_shell: |
+        $dotnetPath = 'C:\Dotnet\dotnet.exe'
+        $projectPath = 'C:\KafkaTest\KafkaExample'
+        $logPath = "{{ log_file_path_dynamic }}"
+
+        $args = "run --project `"$projectPath`""
+        $psi = New-Object System.Diagnostics.ProcessStartInfo
+        $psi.FileName = $dotnetPath
+        $psi.Arguments = $args
+        $psi.RedirectStandardOutput = $true
+        $psi.RedirectStandardError = $true
+        $psi.UseShellExecute = $false
+        $psi.CreateNoWindow = $true
+
+        $proc = New-Object System.Diagnostics.Process
+        $proc.StartInfo = $psi
+
+        $logStream = [System.IO.StreamWriter]::new($logPath, $true)
+        $proc.Start() | Out-Null
+
+        while (-not $proc.HasExited) {
+          $outLine = $proc.StandardOutput.ReadLine()
+          if ($outLine) { $logStream.WriteLine($outLine) }
+        }
+
+        $logStream.Close()
+      args:
+        executable: powershell.exe
+
+    - name: Esperar 5 segundos para garantir início da aplicação
+      win_shell: Start-Sleep -Seconds 5
+      args:
+        executable: powershell.exe
+
+    - name: Mostrar logs em tempo real (pressione Ctrl+C para sair)
+      win_shell: |
+        Get-Content -Path "{{ log_file_path_dynamic }}" -Wait
+      args:
+        executable: powershell.exe

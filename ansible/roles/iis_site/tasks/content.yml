@@ -1,0 +1,14 @@
+---
+- name: Create index classic if missing
+  ansible.windows.win_copy:
+    dest: "{{ classic_physical_path }}\\index.html"
+    content: "<h1>{{ site.name }} - Milessis Classic OK</h1>"
+  args:
+    creates: "{{ classic_physical_path }}\\index.html"
+
+- name: Create index nextgen if missing
+  ansible.windows.win_copy:
+    dest: "{{ nextgen_physical_path }}\\index.html"
+    content: "<h1>{{ site.name }} - Milessis NextGen OK</h1>"
+  args:
+    creates: "{{ nextgen_physical_path }}\\index.html"

@@ -1,0 +1,7 @@
+---
+- name: Windows baseline e IIS
+  hosts: win
+  gather_facts: false
+  roles:
+    - role: windows_baseline
+    - role: iis_site

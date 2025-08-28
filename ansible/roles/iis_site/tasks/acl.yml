@@ -1,0 +1,10 @@
+---
+- name: Grant ACL to app pool on its folder
+  ansible.windows.win_acl:
+    path: "{{ (item.physical == 'classic') | ternary(classic_physical_path, nextgen_physical_path) }}"
+    user: "IIS AppPool\\{{ item.pool }}"
+    rights: ReadAndExecute
+    type: allow
+    inherit: ContainerInherit, ObjectInherit
+    state: present
+  loop: "{{ site.apps }}"

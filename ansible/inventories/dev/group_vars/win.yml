@@ -1,0 +1,33 @@
+iis_sites:
+  - name: "www.argoit.com.br"
+    hostname: "www.argoit.com.br"
+    ip: "*"
+    http_port: 80
+    enable_https: false
+    https_port: 443
+    cert_store_name: "WebHosting"
+    cert_thumbprint: ""        # preencher em PRD
+    start_mode: "AlwaysRunning"
+    managed_runtime: "v4.0"
+    pipeline_mode: "Integrated"
+
+    # Caminhos “declarativos”
+    classic_path: "\\\\fileserverus\\Aplicacoes\\useargo\\tmsweb\\tms_argo09"
+    nextgen_path: "\\\\fileserverus\\Aplicacoes\\useargo\\argoweb\\nx_argo09"
+    fallback_classic_local: "C:\\Sites\\milessis.classic"
+    fallback_nextgen_local: "C:\\Sites\\milessis.nextgen"
+
+    # Pools + apps (pode ter N apps)
+    pools:
+      - name: "milessis.classic"
+      - name: "milessis.nextgen"
+    apps:
+      - path: "/milessis"
+        physical: "classic"
+        pool: "milessis.classic"
+      - path: "/milessis/nx"
+        physical: "nextgen"
+        pool: "milessis.nextgen"
+
+# Opcional: firewall regra HTTP
+open_http_firewall: true

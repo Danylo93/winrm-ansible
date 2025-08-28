@@ -1,0 +1,33 @@
+---
+- include_tasks: site.yml
+  loop: "{{ iis_sites }}"
+  loop_control: { loop_var: site }
+
+- include_tasks: bindings.yml
+  loop: "{{ iis_sites }}"
+  loop_control: { loop_var: site }
+
+- include_tasks: pools.yml
+  loop: "{{ iis_sites }}"
+  loop_control: { loop_var: site }
+
+- include_tasks: paths.yml
+  loop: "{{ iis_sites }}"
+  loop_control: { loop_var: site }
+
+- include_tasks: apps.yml
+  loop: "{{ iis_sites }}"
+  loop_control: { loop_var: site }
+
+- include_tasks: acl.yml
+  loop: "{{ iis_sites }}"
+  loop_control: { loop_var: site }
+
+- include_tasks: content.yml
+  loop: "{{ iis_sites }}"
+  loop_control: { loop_var: site }
+
+- include_tasks: https.yml
+  when: site.enable_https | default(false)
+  loop: "{{ iis_sites }}"
+  loop_control: { loop_var: site }

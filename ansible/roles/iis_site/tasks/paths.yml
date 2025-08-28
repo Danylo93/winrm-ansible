@@ -1,0 +1,25 @@
+---
+- name: Decide physical paths (UNC if exists, else local)
+  vars:
+    classic_unc: "{{ site.classic_path }}"
+    nextgen_unc: "{{ site.nextgen_path }}"
+    classic_local: "{{ site.fallback_classic_local }}"
+    nextgen_local: "{{ site.fallback_nextgen_local }}"
+  block:
+    - ansible.windows.win_stat:
+        path: "{{ classic_unc }}"
+      register: _classic
+    - ansible.windows.win_stat:
+        path: "{{ nextgen_unc }}"
+      register: _nextgen
+    - ansible.builtin.set_fact:
+        classic_physical_path: "{{ (_classic.stat.exists|default(false)) | ternary(classic_unc, classic_local) }}"
+        nextgen_physical_path: "{{ (_nextgen.stat.exists|default(false)) | ternary(nextgen_unc, nextgen_local) }}"
+
+- name: Create resolved physical folders
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ classic_physical_path }}"
+    - "{{ nextgen_physical_path }}"

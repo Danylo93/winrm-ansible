@@ -1,0 +1,219 @@
+---
+- name: Configurar IIS para o site Milessis
+  hosts: win
+  gather_facts: false
+  collections:
+    - ansible.windows
+    - community.windows
+
+  vars:
+    # ====== SITE / BINDINGS ======
+    site_name: "www.argoit.com.br"
+    site_hostname: "www.argoit.com.br"
+    site_ip: "*"
+    http_port: 80
+
+    enable_https: false
+    https_port: 443
+    cert_store_name: "WebHosting"
+    cert_thumbprint: ""
+
+    # ====== APP POOLS ======
+    classic_pool: "milessis.classic"
+    nextgen_pool: "milessis.nextgen"
+    managed_runtime: "v4.0"
+    pipeline_mode: "Integrated"         # "Integrated" | "Classic"
+    start_mode: "AlwaysRunning"
+
+    # ====== CAMINHOS (UNC desejado) ======
+    classic_path: "\\\\fileserverus\\Aplicacoes\\useargo\\tmsweb\\tms_argo09"
+    nextgen_path: "\\\\fileserverus\\Aplicacoes\\useargo\\argoweb\\nx_argo09"
+
+    # Fallback local quando UNC não existir
+    fallback_classic_local: "C:\\Sites\\milessis.classic"
+    fallback_nextgen_local: "C:\\Sites\\milessis.nextgen"
+
+    # Criar site se não existir (aponta para placeholder local)
+    ensure_site: true
+    site_physical_path: "C:\\inetpub\\wwwroot\\_placeholder"
+
+  tasks:
+    - name: Garantir recursos do IIS necessários
+      ansible.windows.win_feature:
+        name:
+          - Web-Server
+          - Web-WebServer
+          - Web-Common-Http
+          - Web-Default-Doc
+          - Web-Static-Content
+          - Web-Http-Errors
+          - Web-Filtering
+          - Web-Performance
+          - Web-Stat-Compression
+          - Web-ISAPI-Ext
+          - Web-ISAPI-Filter
+          - Web-Asp-Net45
+          - Web-Net-Ext45
+          - Web-Mgmt-Service
+          - Web-Mgmt-Tools
+          - Web-Scripting-Tools
+        state: present
+        include_sub_features: true
+
+    - name: Criar diretório placeholder do site (se for criar o site)
+      ansible.windows.win_file:
+        path: "{{ site_physical_path }}"
+        state: directory
+      when: ensure_site
+
+    - name: Garantir que o site existe (opcional)
+      community.windows.win_iis_website:
+        name: "{{ site_name }}"
+        state: started
+        physical_path: "{{ site_physical_path }}"
+        ip: "{{ site_ip }}"
+        port: "{{ http_port }}"
+        hostname: "{{ site_hostname }}"
+      when: ensure_site
+
+    - name: Garantir binding HTTP do site
+      community.windows.win_iis_webbinding:
+        name: "{{ site_name }}"
+        protocol: http
+        port: "{{ http_port }}"
+        ip: "{{ site_ip }}"
+        host_header: "{{ site_hostname }}"
+        state: present
+
+    - name: Garantir binding HTTPS do site (opcional)
+      community.windows.win_iis_webbinding:
+        name: "{{ site_name }}"
+        protocol: https
+        port: "{{ https_port }}"
+        ip: "{{ site_ip }}"
+        host_header: "{{ site_hostname }}"
+        certificate_hash: "{{ cert_thumbprint }}"
+        certificate_store_name: "{{ cert_store_name }}"
+        state: present
+      when:
+        - enable_https
+        - cert_thumbprint | length > 0
+
+    # ====== APP POOLS ======
+    - name: Criar/ajustar Application Pool - classic
+      community.windows.win_iis_webapppool:
+        name: "{{ classic_pool }}"
+        state: started
+        managed_runtime_version: "{{ managed_runtime }}"
+        managed_pipeline_mode: "{{ pipeline_mode }}"
+        start_mode: "{{ start_mode }}"
+        auto_start: true
+
+    - name: Criar/ajustar Application Pool - nextgen
+      community.windows.win_iis_webapppool:
+        name: "{{ nextgen_pool }}"
+        state: started
+        managed_runtime_version: "{{ managed_runtime }}"
+        managed_pipeline_mode: "{{ pipeline_mode }}"
+        start_mode: "{{ start_mode }}"
+        auto_start: true
+
+    # ====== RESOLVER CAMINHOS (UNC -> local se não existir) ======
+    - name: Checar existência do caminho classic (UNC)
+      ansible.windows.win_stat:
+        path: "{{ classic_path }}"
+      register: classic_stat
+
+    - name: Checar existência do caminho nextgen (UNC)
+      ansible.windows.win_stat:
+        path: "{{ nextgen_path }}"
+      register: nextgen_stat
+
+    - name: Definir paths físicos resolvidos (UNC se existir, senão local)
+      ansible.builtin.set_fact:
+        classic_physical_path_resolved: "{{ (classic_stat.stat.exists | default(false)) | ternary(classic_path, fallback_classic_local) }}"
+        nextgen_physical_path_resolved: "{{ (nextgen_stat.stat.exists | default(false)) | ternary(nextgen_path, fallback_nextgen_local) }}"
+
+    - name: Criar diretórios físicos resolvidos
+      ansible.windows.win_file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - "{{ classic_physical_path_resolved }}"
+        - "{{ nextgen_physical_path_resolved }}"
+
+    # ====== APPS ======
+    - name: Publicar aplicação /milessis (classic)
+      community.windows.win_iis_webapplication:
+        name: "milessis"
+        site: "{{ site_name }}"
+        physical_path: "{{ classic_physical_path_resolved }}"
+        application_pool: "{{ classic_pool }}"
+        state: present
+
+    - name: Publicar aplicação /milessis/nx (nextgen)
+      community.windows.win_iis_webapplication:
+        name: "milessis/nx"
+        site: "{{ site_name }}"
+        physical_path: "{{ nextgen_physical_path_resolved }}"
+        application_pool: "{{ nextgen_pool }}"
+        state: present
+
+    # ====== IDENTIDADE/ACL (evitar 503) ======
+    - name: Pools usam ApplicationPoolIdentity
+      community.windows.win_iis_webapppool:
+        name: "{{ item }}"
+        state: started
+        attributes:
+          processModel.identityType: 4               # ApplicationPoolIdentity
+          recycling.periodicRestart.time: "00:00:00"
+      loop:
+        - "{{ classic_pool }}"
+        - "{{ nextgen_pool }}"
+
+    - name: Conceder ACL para AppPool (classic)
+      ansible.windows.win_acl:
+        path: "{{ classic_physical_path_resolved }}"
+        user: "IIS AppPool\\{{ classic_pool }}"
+        rights: ReadAndExecute
+        type: allow
+        inherit: ContainerInherit, ObjectInherit
+        state: present
+
+    - name: Conceder ACL para AppPool (nextgen)
+      ansible.windows.win_acl:
+        path: "{{ nextgen_physical_path_resolved }}"
+        user: "IIS AppPool\\{{ nextgen_pool }}"
+        rights: ReadAndExecute
+        type: allow
+        inherit: ContainerInherit, ObjectInherit
+        state: present
+
+    - name: Criar index.html (classic) se faltar
+      ansible.windows.win_copy:
+        dest: "{{ classic_physical_path_resolved }}\\index.html"
+        content: "<h1>Milessis Classic OK</h1>"
+      args:
+        creates: "{{ classic_physical_path_resolved }}\\index.html"
+
+    - name: Criar index.html (nextgen) se faltar
+      ansible.windows.win_copy:
+        dest: "{{ nextgen_physical_path_resolved }}\\index.html"
+        content: "<h1>Milessis NextGen OK</h1>"
+      args:
+        creates: "{{ nextgen_physical_path_resolved }}\\index.html"
+
+    # (Opcional) desabilitar Rapid-Fail durante testes
+    - name: Desabilitar Rapid-Fail temporariamente
+      ansible.windows.win_shell: |
+        Import-Module WebAdministration
+        Set-ItemProperty "IIS:\AppPools\{{ item }}" -Name "failure.rapidFailProtection" -Value False
+      loop:
+        - "{{ classic_pool }}"
+        - "{{ nextgen_pool }}"
+
+    # Reinício simples do IIS ao final (opcional)
+    - name: Reiniciar IIS
+      ansible.windows.win_shell: iisreset
+      args:
+        warn: false
