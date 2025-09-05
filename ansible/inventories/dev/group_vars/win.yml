@@ -31,3 +31,9 @@ iis_sites:
 
 # Opcional: firewall regra HTTP
 open_http_firewall: true
+
+# Azure DevOps (somente DEV): preencha com os valores do seu projeto
+# O token (PAT) deve ser fornecido via variável de ambiente AZURE_DEVOPS_PAT no controlador
+azure_devops_org: "SEU_ORG"
+azure_devops_project: "SEU_PROJETO"
+azure_devops_pipeline_id: "123"  # ID numérico do pipeline YAML a ser disparado

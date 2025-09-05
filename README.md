@@ -250,3 +250,35 @@ ansible-playbook -i inventories/dev/hosts.yml playbooks/deploy_iis.yml --tags ba
 ## Remoção (teardown) **opcional**
 
 Crie um play `playbooks/teardown_iis.yml` com `state: absent` para `win_iis_webapplication`, `win_iis_webbinding` e `win_iis_website` se precisar desprovisionar.
+
+---
+
+## Release DEV (parar IIS → disparar pipeline → reiniciar)
+
+1. Defina as variáveis do Azure DevOps em `ansible/inventories/dev/group_vars/win.yml`:
+
+```yaml
+azure_devops_org: "SEU_ORG"
+azure_devops_project: "SEU_PROJETO"
+azure_devops_pipeline_id: "123"  # ID YAML pipeline
+```
+
+2. Exporte o PAT no controlador (não salve a senha em arquivo):
+
+```bash
+export AZURE_DEVOPS_PAT=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+3. Rode o playbook de release DEV (logs claros + arquivo `ansible/ansible-dev-release.log`):
+
+```bash
+cd ansible
+ansible-playbook playbooks/release_dev.yml
+```
+
+O playbook executa:
+- Stop do IIS (serviço `W3SVC`)
+- Disparo do pipeline no Azure DevOps e espera até a conclusão
+- Start + restart do IIS (`iisreset /restart`)
+
+Erros no pipeline causam falha do playbook, mantendo a reativação do IIS ao final para não deixar o host offline.
