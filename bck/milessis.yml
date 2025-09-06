@@ -8,8 +8,8 @@
 
   vars:
     # ====== SITE / BINDINGS ======
-    site_name: "www.argoit.com.br"
-    site_hostname: "www.argoit.com.br"
+    site_name: "www.testeobt.com.br"
+    site_hostname: "www.testeobt.com.br"
     site_ip: "*"
     http_port: 80
 
@@ -27,7 +27,7 @@
 
     # ====== CAMINHOS (UNC desejado) ======
     classic_path: "\\\\fileserverus\\Aplicacoes\\useargo\\tmsweb\\tms_argo09"
-    nextgen_path: "\\\\fileserverus\\Aplicacoes\\useargo\\argoweb\\nx_argo09"
+    nextgen_path: "\\\\fileserverus\\Aplicacoes\\useargo\\argoweb\\milessis\\nx"
 
     # Fallback local quando UNC não existir
     fallback_classic_local: "C:\\Sites\\milessis.classic"

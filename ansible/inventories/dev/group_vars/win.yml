@@ -13,7 +13,7 @@ iis_sites:
 
     # Caminhos “declarativos”
     classic_path: "\\\\fileserverus\\Aplicacoes\\useargo\\tmsweb\\tms_argo09"
-    nextgen_path: "\\\\fileserverus\\Aplicacoes\\useargo\\argoweb\\nx_argo09"
+    nextgen_path: "\\\\fileserverus\\Aplicacoes\\useargo\\argoweb\\milessis\\nx"
     fallback_classic_local: "C:\\Sites\\milessis.classic"
     fallback_nextgen_local: "C:\\Sites\\milessis.nextgen"
 

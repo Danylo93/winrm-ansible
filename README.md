@@ -73,8 +73,8 @@ Edite `ansible/inventories/dev/group_vars/win.yml`:
 
 ```yaml
 iis_sites:
-  - name: "www.argoit.com.br"
-    hostname: "www.argoit.com.br"
+  - name: "www.testeobt.com.br"
+    hostname: "www.testeobt.com.br"
     ip: "*"
     http_port: 80
     enable_https: false
@@ -87,7 +87,7 @@ iis_sites:
     start_mode: "AlwaysRunning"
 
     classic_path: "\\\\fileserverus\\Aplicacoes\\useargo\\tmsweb\\tms_argo09"
-    nextgen_path: "\\\\fileserverus\\Aplicacoes\\useargo\\argoweb\\nx_argo09"
+    nextgen_path: "\\\\fileserverus\\Aplicacoes\\useargo\\argoweb\\milessis\\nx"
     fallback_classic_local: "C:\\Sites\\milessis.classic"
     fallback_nextgen_local: "C:\\Sites\\milessis.nextgen"
 
@@ -189,16 +189,16 @@ Na **VM Windows** (PowerShell Admin):
 
 ```powershell
 Import-Module WebAdministration
-Get-WebBinding -Name 'www.argoit.com.br' | fl protocol,bindingInformation,hostHeader
-Get-WebApplication -Site 'www.argoit.com.br' | select path,physicalPath,applicationPool
+Get-WebBinding -Name 'www.testeobt.com.br' | fl protocol,bindingInformation,hostHeader
+Get-WebApplication -Site 'www.testeobt.com.br' | select path,physicalPath,applicationPool
 Get-WebAppPoolState 'milessis.classic','milessis.nextgen'
 
 # Testes com host header
-Invoke-WebRequest -Headers @{Host='www.argoit.com.br'} http://127.0.0.1/milessis -UseBasicParsing | Select StatusCode
-Invoke-WebRequest -Headers @{Host='www.argoit.com.br'} http://127.0.0.1/milessis/nx -UseBasicParsing | Select StatusCode
+Invoke-WebRequest -Headers @{Host='www.testeobt.com.br'} http://127.0.0.1/milessis -UseBasicParsing | Select StatusCode
+Invoke-WebRequest -Headers @{Host='www.testeobt.com.br'} http://127.0.0.1/milessis/nx -UseBasicParsing | Select StatusCode
 ```
 
-> O site usa host header; para testar via navegador local, adicione `127.0.0.1  www.argoit.com.br` no `hosts` da VM (ou adicione um binding extra sem host header).
+> O site usa host header; para testar via navegador local, adicione `127.0.0.1  www.testeobt.com.br` no `hosts` da VM (ou adicione um binding extra sem host header).
 
 ---
 

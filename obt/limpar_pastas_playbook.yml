@@ -28,7 +28,7 @@
       - { name: "tms_argo07",     pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_argo07",      exc: ["images","Web.config","ApplicationInsights.config"] }
       - { name: "nx_argo08",      pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_argo08",      exc: ["images","Web.config","ApplicationInsights.config"] }
       - { name: "tms_argo08",     pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_argo08",      exc: ["images","Web.config","ApplicationInsights.config"] }
-      - { name: "nx_argo09",      pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_argo09",      exc: ["images","Web.config","ApplicationInsights.config"] }
+      - { name: "nx_milessis",    pasta: "E:\\Aplicacoes\\useargo\\argoweb\\milessis\\nx",      exc: ["images","Web.config","ApplicationInsights.config"] }
       - { name: "tms_argo09",     pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_argo09",      exc: ["images","Web.config","ApplicationInsights.config"] }
       - { name: "nx_argo10",      pasta: "E:\\Aplicacoes\\useargo\\argoweb\\nx_argo10",      exc: ["images","Web.config","ApplicationInsights.config"] }
       - { name: "tms_argo10",     pasta: "E:\\Aplicacoes\\useargo\\tmsweb\\tms_argo10",      exc: ["images","Web.config","ApplicationInsights.config"] }
