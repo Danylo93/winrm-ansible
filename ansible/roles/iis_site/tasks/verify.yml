@@ -1,10 +1,15 @@
 ---
 - name: Validate HTTP responses from site apps
   ansible.windows.win_uri:
-    url: "http://localhost:{{ site.http_port | default(80) }}{{ app.path }}"
+    url: "http://127.0.0.1:{{ site.http_port | default(80) }}{{ app.path }}"
     headers:
       Host: "{{ site.hostname }}"
     status_code: 200
+    use_proxy: no
+  register: site_check
+  retries: "{{ site.verify_retries | default(5) }}"
+  delay: "{{ site.verify_delay | default(3) }}"
+  until: site_check.status_code == 200
   loop: "{{ site.apps | default([]) }}"
   loop_control:
     loop_var: app
