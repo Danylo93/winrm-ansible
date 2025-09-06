@@ -1,4 +1,74 @@
+#
+# Project .gitignore (Ansible + Terraform + Windows dev)
+#
+
+# ----------------------
+# OS / Editor junk
+# ----------------------
+.DS_Store
+Thumbs.db
+Desktop.ini
+.vscode/
+.idea/
+*.code-workspace
+
+# ----------------------
+# Python (venv/caches)
+# ----------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+.tox/
+.pytest_cache/
+.mypy_cache/
+.eggs/
+*.egg-info/
+
+# Local env files
+.env
+.env.*
+
+# ----------------------
+# Logs / temp
+# ----------------------
+*.log
+logs/
+log/
+*.tmp
+*.temp
+~$*
+*.swp
+*.swo
+
+# Ansible run artifacts
+*.retry
+ansible/ansible-dev-release.log
+
+# Optional: ignore Galaxy-installed collections (recreate via requirements.yml)
+ansible/collections/ansible_collections/
+!ansible/collections/requirements.yml
+
+# ----------------------
+# Terraform
+# ----------------------
+**/.terraform/
 .terraform/
-terraform/
-.terraform.lock.hcl
 *.tfstate
+*.tfstate.*
+terraform.tfstate.d/
+crash.log
+crash.*.log
+*.tfvars
+terraform.tfvars
+*.tfplan
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# IMPORTANT: keep provider lock file versioned
+# (remove the ignore if previously present)
+!/.terraform.lock.hcl
