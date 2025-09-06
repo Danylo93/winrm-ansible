@@ -34,3 +34,13 @@
     protocol: tcp
     state: present
     enabled: yes
+
+- name: Ensure IIS service is running
+  ansible.windows.win_service:
+    name: W3SVC
+    state: started
+
+- name: Ensure Windows Process Activation Service is running
+  ansible.windows.win_service:
+    name: WAS
+    state: started
