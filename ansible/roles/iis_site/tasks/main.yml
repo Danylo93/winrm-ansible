@@ -31,3 +31,7 @@
   when: site.enable_https | default(false)
   loop: "{{ iis_sites }}"
   loop_control: { loop_var: site }
+
+- include_tasks: verify.yml
+  loop: "{{ iis_sites }}"
+  loop_control: { loop_var: site }
