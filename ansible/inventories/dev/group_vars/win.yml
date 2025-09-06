@@ -32,6 +32,9 @@ iis_sites:
 # Opcional: firewall regra HTTP
 open_http_firewall: true
 
+# Publicar conteúdo de exemplo ASP.NET (.NET Framework Web Forms)
+deploy_sample_dotnet: true
+
 # Azure DevOps (somente DEV): preencha com os valores do seu projeto
 # O token (PAT) deve ser fornecido via variável de ambiente AZURE_DEVOPS_PAT no controlador
 azure_devops_org: "SEU_ORG"

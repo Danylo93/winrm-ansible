@@ -5,6 +5,7 @@
     content: "<h1>{{ site.name }} - Milessis Classic OK</h1>"
   args:
     creates: "{{ classic_physical_path }}\\index.html"
+  when: not (deploy_sample_dotnet | default(false))
 
 - name: Create index nextgen if missing
   ansible.windows.win_copy:
@@ -12,3 +13,28 @@
     content: "<h1>{{ site.name }} - Milessis NextGen OK</h1>"
   args:
     creates: "{{ nextgen_physical_path }}\\index.html"
+  when: not (deploy_sample_dotnet | default(false))
+
+- name: Deploy sample ASP.NET (Web Forms) to classic
+  when: (deploy_sample_dotnet | default(false))
+  block:
+    - name: Copy Web.config (classic)
+      ansible.windows.win_copy:
+        src: sample_dotnet/Web.config
+        dest: "{{ classic_physical_path }}\\Web.config"
+    - name: Copy Default.aspx (classic)
+      ansible.windows.win_copy:
+        src: sample_dotnet/Default.aspx
+        dest: "{{ classic_physical_path }}\\Default.aspx"
+
+- name: Deploy sample ASP.NET (Web Forms) to nextgen
+  when: (deploy_sample_dotnet | default(false))
+  block:
+    - name: Copy Web.config (nextgen)
+      ansible.windows.win_copy:
+        src: sample_dotnet/Web.config
+        dest: "{{ nextgen_physical_path }}\\Web.config"
+    - name: Copy Default.aspx (nextgen)
+      ansible.windows.win_copy:
+        src: sample_dotnet/Default.aspx
+        dest: "{{ nextgen_physical_path }}\\Default.aspx"
