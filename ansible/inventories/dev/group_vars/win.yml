@@ -1,6 +1,6 @@
 iis_sites:
-  - name: "www.argoit.com.br"
-    hostname: "www.argoit.com.br"
+  - name: "www.testeobt.com.br"
+    hostname: "www.testeobt.com.br"
     ip: "*"
     http_port: 80
     enable_https: false
