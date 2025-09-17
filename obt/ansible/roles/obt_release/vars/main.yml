@@ -1,0 +1,41 @@
+# ==========================================
+# 📊 VARIÁVEIS - OBT RELEASE
+# ==========================================
+# Variáveis específicas da role
+# ==========================================
+
+---
+# Configurações internas da role
+role_name: obt_release
+role_version: "2.0.0"
+
+# Paths internos
+internal_paths:
+  temp_dir: "C:\\temp\\obt_release"
+  log_dir: "C:\\logs\\obt_release"
+  backup_base: "C:\\releases\\backup"
+
+# Configurações de timeout
+timeouts:
+  service_stop: 30
+  service_start: 60
+  backup_timeout: 300
+  deploy_timeout: 600
+
+# Configurações de retry
+retry_config:
+  max_retries: 3
+  delay: 5
+
+# Validações internas
+validations:
+  check_disk_space: true
+  verify_backup: true
+  test_connectivity: true
+  validate_permissions: true
+
+# Configurações de logging
+logging:
+  level: "INFO"
+  format: "json"
+  retention_days: 30

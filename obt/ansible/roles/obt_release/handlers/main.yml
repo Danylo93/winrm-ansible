@@ -1,0 +1,68 @@
+# ==========================================
+# 🎯 HANDLERS - OBT RELEASE
+# ==========================================
+# Handlers para automação do OBT
+# ==========================================
+
+---
+- name: restart iis
+  ansible.windows.win_service:
+    name: W3SVC
+    state: restarted
+  listen: "restart web services"
+
+- name: restart app pool
+  community.windows.win_iis_webapppool:
+    name: "{{ obt_config.app_pool | default('OBTAppPool') }}"
+    state: restarted
+  listen: "restart web services"
+
+- name: clear iis cache
+  ansible.windows.win_shell: |
+    Remove-Item -Path "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Temporary ASP.NET Files\*" -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path "C:\Windows\Microsoft.NET\Framework\v4.0.30319\Temporary ASP.NET Files\*" -Recurse -Force -ErrorAction SilentlyContinue
+  listen: "clear cache"
+
+- name: restart windows service
+  ansible.windows.win_service:
+    name: "{{ item }}"
+    state: restarted
+  with_items:
+    - W3SVC
+    - WAS
+  listen: "restart all services"
+
+- name: backup completed notification
+  debug:
+    msg: |
+      ==========================================
+      📦 BACKUP CONCLUÍDO
+      ==========================================
+      📁 Backup salvo em: {{ backup_path | default('C:\\releases\\backup') }}
+      🕐 Timestamp: {{ ansible_date_time.epoch | default('N/A') }}
+      ==========================================
+  listen: "backup completed"
+
+- name: deployment completed notification
+  debug:
+    msg: |
+      ==========================================
+      🎉 DEPLOY CONCLUÍDO COM SUCESSO!
+      ==========================================
+      🎯 Ambiente: {{ ansible_environment | default('DEV') }}
+      📁 Path: {{ obt_config.release_path | default('C:\\inetpub\\wwwroot\\OBT') }}
+      🕐 Concluído em: {{ ansible_date_time.iso8601 | default('agora') }}
+      ==========================================
+  listen: "deployment completed"
+
+- name: rollback notification
+  debug:
+    msg: |
+      ==========================================
+      ⚠️ ROLLBACK EXECUTADO
+      ==========================================
+      📁 Versão anterior restaurada
+      🔄 Serviços reiniciados
+      ⚠️ Verifique logs para detalhes
+      ==========================================
+  listen: "rollback completed"

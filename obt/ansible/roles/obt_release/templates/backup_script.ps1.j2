@@ -1,0 +1,68 @@
+# ==========================================
+# 📦 SCRIPT DE BACKUP - OBT
+# ==========================================
+# Template para script de backup
+# ==========================================
+
+param(
+    [string]$SourcePath = "{{ obt_config.release_path | default('C:\\inetpub\\wwwroot\\OBT') }}",
+    [string]$BackupPath = "{{ backup_path | default('C:\\releases\\backup') }}",
+    [string]$Timestamp = "{{ ansible_date_time.epoch | default('') }}"
+)
+
+# Configurações
+$ErrorActionPreference = "Stop"
+$BackupName = "obt_backup_$Timestamp"
+$FullBackupPath = Join-Path $BackupPath $BackupName
+
+try {
+    Write-Host "===========================================" -ForegroundColor Cyan
+    Write-Host "📦 INICIANDO BACKUP DO OBT" -ForegroundColor Cyan
+    Write-Host "===========================================" -ForegroundColor Cyan
+    Write-Host "📁 Origem: $SourcePath" -ForegroundColor Yellow
+    Write-Host "📁 Destino: $FullBackupPath" -ForegroundColor Yellow
+    Write-Host "🕐 Timestamp: $Timestamp" -ForegroundColor Yellow
+    Write-Host "===========================================" -ForegroundColor Cyan
+
+    # Criar diretório de backup se não existir
+    if (!(Test-Path $BackupPath)) {
+        New-Item -ItemType Directory -Path $BackupPath -Force | Out-Null
+        Write-Host "✅ Diretório de backup criado: $BackupPath" -ForegroundColor Green
+    }
+
+    # Verificar se origem existe
+    if (!(Test-Path $SourcePath)) {
+        throw "❌ Diretório de origem não encontrado: $SourcePath"
+    }
+
+    # Criar backup
+    Write-Host "📦 Criando backup..." -ForegroundColor Yellow
+    Copy-Item -Path $SourcePath -Destination $FullBackupPath -Recurse -Force
+    
+    # Verificar backup
+    if (Test-Path $FullBackupPath) {
+        $BackupSize = (Get-ChildItem $FullBackupPath -Recurse | Measure-Object -Property Length -Sum).Sum
+        $BackupSizeMB = [math]::Round($BackupSize / 1MB, 2)
+        
+        Write-Host "===========================================" -ForegroundColor Green
+        Write-Host "✅ BACKUP CONCLUÍDO COM SUCESSO!" -ForegroundColor Green
+        Write-Host "===========================================" -ForegroundColor Green
+        Write-Host "📁 Backup salvo em: $FullBackupPath" -ForegroundColor Green
+        Write-Host "📊 Tamanho: $BackupSizeMB MB" -ForegroundColor Green
+        Write-Host "🕐 Concluído em: $(Get-Date)" -ForegroundColor Green
+        Write-Host "===========================================" -ForegroundColor Green
+        
+        # Retornar path do backup
+        return $FullBackupPath
+    } else {
+        throw "❌ Falha ao criar backup"
+    }
+
+} catch {
+    Write-Host "===========================================" -ForegroundColor Red
+    Write-Host "❌ ERRO NO BACKUP!" -ForegroundColor Red
+    Write-Host "===========================================" -ForegroundColor Red
+    Write-Host "❌ Erro: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "===========================================" -ForegroundColor Red
+    exit 1
+}
