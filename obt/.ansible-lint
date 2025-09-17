@@ -1,0 +1,55 @@
+# ==========================================
+# 🔍 ANSIBLE-LINT CONFIGURATION
+# ==========================================
+# Configuração para validação de playbooks Ansible
+# ==========================================
+
+# Usar perfil de produção
+profile: production
+
+# Diretórios a serem verificados
+kinds:
+  - playbook: "ansible/playbooks/*.yml"
+  - tasks: "ansible/roles/*/tasks/*.yml"
+  - vars: "ansible/roles/*/vars/*.yml"
+  - defaults: "ansible/roles/*/defaults/*.yml"
+  - meta: "ansible/roles/*/meta/*.yml"
+  - handlers: "ansible/roles/*/handlers/*.yml"
+
+# Excluir algumas regras específicas para nosso projeto
+skip_list:
+  - yaml[line-length]  # Permitir linhas longas
+  - name[casing]       # Permitir nomes com emojis
+  - var-naming[no-role-prefix]  # Permitir variáveis sem prefixo da role
+  - risky-shell-pipe   # Permitir pipes em shell (necessário para PowerShell)
+  - command-instead-of-shell  # Permitir shell quando necessário
+  - no-changed-when    # Permitir tasks sem changed_when em alguns casos
+
+# Configurações específicas
+warn_list:
+  - experimental  # Avisar sobre recursos experimentais
+  - yaml[truthy]  # Avisar sobre valores booleanos
+
+# Excluir arquivos/diretórios
+exclude_paths:
+  - cache/
+  - logs/
+  - .git/
+  - .github/
+  - "*.log"
+
+# Configurações de saída
+verbosity: 1
+
+# Configurações específicas para Windows/PowerShell
+# Permitir uso de win_shell e comandos PowerShell
+mock_modules:
+  - win_shell
+  - win_command
+  - ansible.windows.win_shell
+  - ansible.windows.win_command
+
+# Configurações para roles
+mock_roles:
+  - windows_baseline
+  - iis_site

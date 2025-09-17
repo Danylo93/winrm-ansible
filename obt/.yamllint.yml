@@ -1,0 +1,74 @@
+# ==========================================
+# 🔍 YAMLLINT CONFIGURATION
+# ==========================================
+# Configuração para validação de arquivos YAML
+# ==========================================
+
+extends: default
+
+rules:
+  # Permitir linhas longas (comum em Ansible)
+  line-length:
+    max: 200
+    level: warning
+
+  # Permitir comentários longos
+  comments:
+    min-spaces-from-content: 1
+
+  # Permitir indentação flexível
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false
+
+  # Permitir chaves duplicadas em alguns casos
+  key-duplicates: enable
+
+  # Permitir valores vazios
+  empty-values:
+    forbid-in-block-mappings: false
+    forbid-in-flow-mappings: false
+
+  # Permitir documentos vazios
+  document-start: disable
+  document-end: disable
+
+  # Desabilitar trailing spaces (comum em templates)
+  trailing-spaces: disable
+
+  # Permitir new line no final
+  new-line-at-end-of-file: disable
+
+  # Permitir espaços em braces (comum em Ansible)
+  braces:
+    min-spaces-inside: 0
+    max-spaces-inside: 2
+    min-spaces-inside-empty: 0
+    max-spaces-inside-empty: 0
+
+  # Permitir linhas vazias extras
+  empty-lines:
+    max: 2
+    max-start: 1
+    max-end: 1
+
+  # Permitir diferentes tipos de new line
+  new-lines:
+    type: platform
+
+  # Permitir comentários com indentação flexível
+  comments-indentation: disable
+
+  # Configurações específicas para Ansible
+  truthy:
+    allowed-values: ['true', 'false', 'yes', 'no']
+    check-keys: false
+
+# Ignorar alguns arquivos/diretórios
+ignore: |
+  cache/
+  logs/
+  *.log
+  .git/
+  .github/
