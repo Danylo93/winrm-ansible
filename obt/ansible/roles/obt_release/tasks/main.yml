@@ -1,0 +1,45 @@
+# ==========================================
+# 🚀 TASK PRINCIPAL - OBT RELEASE
+# ==========================================
+# Orquestração do processo completo de release
+# ==========================================
+
+---
+- name: "🚀 Iniciando Release do OBT"
+  debug:
+    msg: |
+      ==========================================
+      🎯 RELEASE AUTOMATIZADA OBT
+      ==========================================
+      🏗️ Ambiente: {{ environment | default('dev') }}
+      {% if test_mode | default(false) %}
+      🧪 MODO TESTE: Validando automação na VM
+      {% endif %}
+      {% if environment == 'prd' %}
+      🚀 PRODUÇÃO: Release real em andamento
+      {% endif %}
+      🎯 Site: {{ obt_site_name }}
+      📁 Destino: {{ obt_release_path }}
+      ==========================================
+
+- name: "📅 Obter informações de data/hora"
+  include_tasks: datetime.yml
+
+- name: "🧹 Executar limpeza de pastas"
+  include_tasks: cleanup.yml
+  when: cleanup_enabled | default(true)
+  tags:
+    - cleanup
+
+- name: "🎉 Release concluída com sucesso!"
+  debug:
+    msg: |
+      ==========================================
+      🎉 RELEASE CONCLUÍDA COM SUCESSO!
+      ==========================================
+      📅 Concluída em: {{ ansible_date_time.iso8601 | default('agora') }}
+      🎯 Ambiente: {{ environment | default('test') }}
+      ✅ Limpeza de pastas executada com sucesso
+      📊 ArgoWeb: {{ active_cleanup_clients.argoweb | length }} pastas
+      📊 TmsWeb: {{ active_cleanup_clients.tmsweb | length }} pastas
+      ==========================================

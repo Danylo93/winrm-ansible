@@ -1,0 +1,222 @@
+# ==========================================
+# 🧹 TASKS DE LIMPEZA DE PASTAS
+# ==========================================
+# Limpeza automatizada de pastas ArgoWeb e TmsWeb
+# ==========================================
+
+---
+- name: "🧹 Definir lista de clientes para limpeza"
+  set_fact:
+    active_cleanup_clients: "{{ test_cleanup_clients if test_mode | default(false) else cleanup_clients }}"
+
+- name: "🧹 Iniciando limpeza de pastas"
+  debug:
+    msg: |
+      ==========================================
+      🧹 LIMPEZA DE PASTAS
+      ==========================================
+      {% if test_mode | default(false) %}
+      🧪 MODO TESTE: Limpeza limitada para validação
+      📂 ArgoWeb: {{ active_cleanup_clients.argoweb | length }} clientes (teste)
+      📂 TmsWeb: {{ active_cleanup_clients.tmsweb | length }} clientes (teste)
+      {% else %}
+      🚀 PRODUÇÃO: Limpeza completa
+      📂 ArgoWeb: {{ active_cleanup_clients.argoweb | length }} clientes
+      📂 TmsWeb: {{ active_cleanup_clients.tmsweb | length }} clientes
+      {% endif %}
+      🛡️ Preservando: {{ cleanup_preserve_files | join(', ') }}
+      ==========================================
+
+- name: "🧹 Limpeza ArgoWeb ➜ {{ item.nome }}"
+  ansible.windows.win_powershell:
+    parameters:
+      Path: "{{ argoweb_base_path }}\\{{ item.pasta }}"
+      Exceptions: "{{ cleanup_preserve_files }}"
+      ClientName: "{{ item.nome }}"
+      ClientType: "argoweb"
+    script: |
+      param(
+        [string]$Path,
+        [string[]]$Exceptions,
+        [string]$ClientName,
+        [string]$ClientType
+      )
+
+      $startTime = Get-Date
+      Write-Output "🧹 [$ClientType] Iniciando limpeza: $ClientName"
+      Write-Output "📁 Caminho: $Path"
+      Write-Output "🛡️ Preservando: $($Exceptions -join ', ')"
+      Write-Output "⏰ Início: $($startTime.ToString('yyyy-MM-dd HH:mm:ss'))"
+      Write-Output "=" * 60
+
+      if (-not (Test-Path -LiteralPath $Path)) {
+        Write-Output "⚠️ AVISO: Pasta não encontrada - $Path"
+        Write-Output "✅ Continuando com próxima pasta..."
+        return
+      }
+
+      $deleted = 0
+      $skipped = 0
+      $errors = 0
+      $totalSize = 0
+
+      try {
+        $entries = Get-ChildItem -LiteralPath $Path -Force
+        Write-Output "📊 Total de itens encontrados: $($entries.Count)"
+        
+        foreach ($entry in $entries) {
+          $shouldSkip = $false
+          
+          foreach ($exception in $Exceptions) {
+            if ($entry.Name -like "*$exception*") {
+              $shouldSkip = $true
+              break
+            }
+          }
+          
+          if ($shouldSkip) {
+            Write-Output "🛡️ Preservado: $($entry.Name)"
+            $skipped++
+          } else {
+            try {
+              $itemSize = 0
+              if ($entry.PSIsContainer) {
+                $itemSize = (Get-ChildItem -LiteralPath $entry.FullName -Recurse -Force | Measure-Object -Property Length -Sum).Sum
+              } else {
+                $itemSize = $entry.Length
+              }
+              
+              Remove-Item -LiteralPath $entry.FullName -Recurse -Force
+              Write-Output "🗑️ Removido: $($entry.Name) ($('{0:N2}' -f ($itemSize / 1MB)) MB)"
+              $deleted++
+              $totalSize += $itemSize
+            } catch {
+              Write-Output "❌ Erro ao remover $($entry.Name): $($_.Exception.Message)"
+              $errors++
+            }
+          }
+        }
+      } catch {
+        Write-Output "❌ ERRO: Não foi possível listar itens em $Path"
+        Write-Output "❌ Detalhes: $($_.Exception.Message)"
+        $errors++
+      }
+
+      $endTime = Get-Date
+      $duration = $endTime - $startTime
+      
+      Write-Output "=" * 60
+      Write-Output "📊 RESUMO - $ClientName"
+      Write-Output "🗑️ Removidos: $deleted | 🛡️ Preservados: $skipped | ❌ Erros: $errors"
+      Write-Output "💾 Espaço liberado: $('{0:N2}' -f ($totalSize / 1MB)) MB"
+      Write-Output "⏱️ Duração: $($duration.TotalSeconds.ToString('F2'))s"
+      Write-Output "=" * 60
+  loop: "{{ active_cleanup_clients.argoweb }}"
+  register: argoweb_cleanup_results
+  ignore_errors: true
+
+- name: "🧹 Limpeza TmsWeb ➜ {{ item.nome }}"
+  ansible.windows.win_powershell:
+    parameters:
+      Path: "{{ tmsweb_base_path }}\\{{ item.pasta }}"
+      Exceptions: "{{ cleanup_preserve_files }}"
+      ClientName: "{{ item.nome }}"
+      ClientType: "tmsweb"
+    script: |
+      param(
+        [string]$Path,
+        [string[]]$Exceptions,
+        [string]$ClientName,
+        [string]$ClientType
+      )
+
+      $startTime = Get-Date
+      Write-Output "🧹 [$ClientType] Iniciando limpeza: $ClientName"
+      Write-Output "📁 Caminho: $Path"
+      Write-Output "🛡️ Preservando: $($Exceptions -join ', ')"
+      Write-Output "⏰ Início: $($startTime.ToString('yyyy-MM-dd HH:mm:ss'))"
+      Write-Output "=" * 60
+
+      if (-not (Test-Path -LiteralPath $Path)) {
+        Write-Output "⚠️ AVISO: Pasta não encontrada - $Path"
+        Write-Output "✅ Continuando com próxima pasta..."
+        return
+      }
+
+      $deleted = 0
+      $skipped = 0
+      $errors = 0
+      $totalSize = 0
+
+      try {
+        $entries = Get-ChildItem -LiteralPath $Path -Force
+        Write-Output "📊 Total de itens encontrados: $($entries.Count)"
+        
+        foreach ($entry in $entries) {
+          $shouldSkip = $false
+          
+          foreach ($exception in $Exceptions) {
+            if ($entry.Name -like "*$exception*") {
+              $shouldSkip = $true
+              break
+            }
+          }
+          
+          if ($shouldSkip) {
+            Write-Output "🛡️ Preservado: $($entry.Name)"
+            $skipped++
+          } else {
+            try {
+              $itemSize = 0
+              if ($entry.PSIsContainer) {
+                $itemSize = (Get-ChildItem -LiteralPath $entry.FullName -Recurse -Force | Measure-Object -Property Length -Sum).Sum
+              } else {
+                $itemSize = $entry.Length
+              }
+              
+              Remove-Item -LiteralPath $entry.FullName -Recurse -Force
+              Write-Output "🗑️ Removido: $($entry.Name) ($('{0:N2}' -f ($itemSize / 1MB)) MB)"
+              $deleted++
+              $totalSize += $itemSize
+            } catch {
+              Write-Output "❌ Erro ao remover $($entry.Name): $($_.Exception.Message)"
+              $errors++
+            }
+          }
+        }
+      } catch {
+        Write-Output "❌ ERRO: Não foi possível listar itens em $Path"
+        Write-Output "❌ Detalhes: $($_.Exception.Message)"
+        $errors++
+      }
+
+      $endTime = Get-Date
+      $duration = $endTime - $startTime
+      
+      Write-Output "=" * 60
+      Write-Output "📊 RESUMO - $ClientName"
+      Write-Output "🗑️ Removidos: $deleted | 🛡️ Preservados: $skipped | ❌ Erros: $errors"
+      Write-Output "💾 Espaço liberado: $('{0:N2}' -f ($totalSize / 1MB)) MB"
+      Write-Output "⏱️ Duração: $($duration.TotalSeconds.ToString('F2'))s"
+      Write-Output "=" * 60
+  loop: "{{ active_cleanup_clients.tmsweb }}"
+  register: tmsweb_cleanup_results
+  ignore_errors: true
+
+- name: "📊 Resumo geral da limpeza"
+  debug:
+    msg: |
+      ==========================================
+      📊 RESUMO GERAL DA LIMPEZA
+      ==========================================
+      {% if test_mode | default(false) %}
+      🧪 TESTE: Limpeza limitada executada
+      ✅ ArgoWeb: {{ active_cleanup_clients.argoweb | length }} pastas (teste)
+      ✅ TmsWeb: {{ active_cleanup_clients.tmsweb | length }} pastas (teste)
+      {% else %}
+      🚀 PRODUÇÃO: Limpeza completa executada
+      ✅ ArgoWeb: {{ active_cleanup_clients.argoweb | length }} pastas processadas
+      ✅ TmsWeb: {{ active_cleanup_clients.tmsweb | length }} pastas processadas
+      {% endif %}
+      🧹 Limpeza concluída com sucesso!
+      ==========================================

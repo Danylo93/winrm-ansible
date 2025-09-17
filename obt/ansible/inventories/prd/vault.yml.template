@@ -1,0 +1,31 @@
+# ==========================================
+# 🔒 TEMPLATE VAULT - PRODUÇÃO
+# ==========================================
+# Template para criar arquivo vault criptografado
+# NUNCA commitar este arquivo com dados reais!
+# ==========================================
+
+# Para criar o vault real:
+# ansible-vault create ansible/inventories/prd/vault.yml
+
+# Credenciais do servidor de produção
+vault_prd_host: "IP_REAL_PRODUCAO"
+vault_prd_user: "USUARIO_REAL_PRODUCAO"
+vault_prd_password: "SENHA_REAL_PRODUCAO"
+
+# Credenciais Azure DevOps
+vault_azure_org: "SUA_ORG_AZURE"
+vault_azure_project: "SEU_PROJETO_AZURE"
+vault_azure_pipeline_id: "ID_PIPELINE_REAL"
+vault_azure_pat: "TOKEN_REAL_AZURE_DEVOPS"
+
+# Outras credenciais sensíveis
+vault_backup_encryption_key: "CHAVE_CRIPTOGRAFIA_BACKUP"
+vault_monitoring_token: "TOKEN_MONITORAMENTO"
+
+# Configurações específicas de produção
+vault_prd_config:
+  database_connection: "STRING_CONEXAO_BD_PRD"
+  api_keys:
+    external_service: "CHAVE_API_SERVICO_EXTERNO"
+    monitoring: "CHAVE_API_MONITORAMENTO"

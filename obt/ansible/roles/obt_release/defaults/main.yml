@@ -1,0 +1,124 @@
+# ==========================================
+# 🔧 VARIÁVEIS PADRÃO - OBT RELEASE
+# ==========================================
+# Valores padrão para a role de release do OBT
+# Podem ser sobrescritos por inventário ou playbook
+# ==========================================
+
+# Configurações do OBT
+obt_app_pool: "OBTAppPool"
+obt_site_name: "OBT"
+obt_release_path: "C:\\inetpub\\wwwroot\\OBT"
+obt_backup_root: "C:\\releases\\backup"
+obt_source_path: "\\\\buildserver\\releases\\obt\\latest"
+
+# Configurações de backup
+backup_enabled: true
+backup_retention_days: 7
+backup_compress: false
+
+# Configurações de limpeza
+cleanup_enabled: true
+cleanup_timeout: 300
+cleanup_preserve_files:
+  - "images"
+  - "Web.config"
+  - "ApplicationInsights.config"
+  - "librdkafka"
+  - "logs"
+  - "temp"
+
+# Caminhos base para limpeza
+argoweb_base_path: "E:\\Aplicacoes\\useargo\\argoweb"
+tmsweb_base_path: "E:\\Aplicacoes\\useargo\\tmsweb"
+
+# Lista de clientes para limpeza
+cleanup_clients:
+  argoweb:
+    - { nome: "nx_alatur", pasta: "nx_alatur" }
+    - { nome: "nx_alatur02", pasta: "nx_alatur02" }
+    - { nome: "nx_argo01", pasta: "nx_argo01" }
+    - { nome: "nx_argo02", pasta: "nx_argo02" }
+    - { nome: "nx_argo03", pasta: "nx_argo03" }
+    - { nome: "nx_argo04", pasta: "nx_argo04" }
+    - { nome: "nx_argo05", pasta: "nx_argo05" }
+    - { nome: "nx_argo06", pasta: "nx_argo06" }
+    - { nome: "nx_argo07", pasta: "nx_argo07" }
+    - { nome: "nx_argo08", pasta: "nx_argo08" }
+    - { nome: "nx_argo09", pasta: "nx_argo09" }
+    - { nome: "nx_argo10", pasta: "nx_argo10" }
+    - { nome: "nx_argo11", pasta: "nx_argo11" }
+    - { nome: "nx_avipam", pasta: "nx_avipam" }
+    - { nome: "nx_bcd", pasta: "nx_bcd" }
+    - { nome: "nx_bndes", pasta: "nx_bndes" }
+    - { nome: "nx_btmviagens", pasta: "nx_btmviagens" }
+    - { nome: "nx_copastur", pasta: "nx_copastur" }
+    - { nome: "nx_cwt", pasta: "nx_cwt" }
+    - { nome: "nx_flytour", pasta: "nx_flytour" }
+    - { nome: "nx_flytour02", pasta: "nx_flytour02" }
+    - { nome: "nx_itm", pasta: "nx_itm" }
+    - { nome: "nx_latam", pasta: "nx_latam" }
+    - { nome: "nx_latam02", pasta: "nx_latam02" }
+    - { nome: "nx_latam03", pasta: "nx_latam03" }
+    - { nome: "nx_tourhouse", pasta: "nx_tourhouse" }
+    - { nome: "nx_stravel", pasta: "nx_stravel" }
+    - { nome: "milessis_nx", pasta: "milessis\\nx" }
+
+  tmsweb:
+    - { nome: "tms_alatur", pasta: "tms_alatur" }
+    - { nome: "tms_alatur02", pasta: "tms_alatur02" }
+    - { nome: "tms_argo01", pasta: "tms_argo01" }
+    - { nome: "tms_argo02", pasta: "tms_argo02" }
+    - { nome: "tms_argo03", pasta: "tms_argo03" }
+    - { nome: "tms_argo04", pasta: "tms_argo04" }
+    - { nome: "tms_argo05", pasta: "tms_argo05" }
+    - { nome: "tms_argo06", pasta: "tms_argo06" }
+    - { nome: "tms_argo07", pasta: "tms_argo07" }
+    - { nome: "tms_argo08", pasta: "tms_argo08" }
+    - { nome: "tms_argo09", pasta: "tms_argo09" }
+    - { nome: "tms_argo10", pasta: "tms_argo10" }
+    - { nome: "tms_argo11", pasta: "tms_argo11" }
+    - { nome: "tms_avipam", pasta: "tms_avipam" }
+    - { nome: "tms_bcd", pasta: "tms_bcd" }
+    - { nome: "tms_bndes", pasta: "tms_bndes" }
+    - { nome: "tms_btmviagens", pasta: "tms_btmviagens" }
+    - { nome: "tms_copastur", pasta: "tms_copastur" }
+    - { nome: "tms_cwt", pasta: "tms_cwt" }
+    - { nome: "tms_flytour", pasta: "tms_flytour" }
+    - { nome: "tms_flytour02", pasta: "tms_flytour02" }
+    - { nome: "tms_itm", pasta: "tms_itm" }
+    - { nome: "tms_latam", pasta: "tms_latam" }
+    - { nome: "tms_latam02", pasta: "tms_latam02" }
+    - { nome: "tms_latam03", pasta: "tms_latam03" }
+    - { nome: "tms_tourhouse", pasta: "tms_tourhouse" }
+    - { nome: "tms_stravel", pasta: "tms_stravel" }
+    - { nome: "tms_tourhouse_bin", pasta: "tms_tourhouse\\bin" }
+
+# Configurações de validação
+validation_enabled: true
+validation_timeout: 30
+validation_checks:
+  - apppool_status
+  - essential_files
+  - disk_space
+
+# Configurações de Azure DevOps
+azure_devops:
+  enabled: false
+  org: ""
+  project: ""
+  pipeline_id: ""
+  pat: ""
+
+# Configurações de logging
+logging:
+  enabled: true
+  level: "INFO"
+  path: "../logs"
+  retention_days: 30
+
+# Configurações de rollback
+rollback:
+  enabled: true
+  automatic: false
+  timeout: 600

@@ -1,0 +1,71 @@
+# ==========================================
+# 🚀 PLAYBOOK PRINCIPAL - OBT RELEASE
+# ==========================================
+# Playbook modular para release automatizada do OBT
+# Utiliza roles para organização e reutilização
+# ==========================================
+
+---
+- name: "Release Automatizada do OBT"
+  hosts: dev
+  gather_facts: false
+  serial: "{{ max_parallel_deployments | default('100%') }}"
+  
+  vars:
+    # Configurações específicas do playbook
+    playbook_name: "OBT Release"
+    playbook_version: "2.0.0"
+    
+  pre_tasks:
+    - name: "🔍 Verificar conectividade"
+      ansible.windows.win_ping:
+      register: connectivity_check
+      
+    - name: "✅ Conectividade confirmada"
+      debug:
+        msg: "Conectividade com {{ inventory_hostname }} estabelecida"
+      when: connectivity_check is succeeded
+      
+    - name: "❌ Falha na conectividade"
+      fail:
+        msg: "Não foi possível conectar com {{ inventory_hostname }}"
+      when: connectivity_check is failed
+
+  tasks:
+    - name: "📋 Incluir tasks da role obt_release"
+      include_role:
+        name: obt_release
+      tags:
+        - obt
+        - release
+        - deploy
+        
+  post_tasks:
+    - name: "📊 Coleta de métricas pós-deploy"
+      ansible.windows.win_shell: |
+        $metrics = @{
+          'Hostname' = $env:COMPUTERNAME
+          'Timestamp' = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+          'Environment' = "{{ environment | default('unknown') }}"
+          'Release_Path' = "{{ obt_release_path }}"
+          'App_Pool' = "{{ obt_app_pool }}"
+        }
+        $metrics | ConvertTo-Json
+      register: post_deploy_metrics
+      
+    - name: "📈 Exibir métricas"
+      debug:
+        msg: "{{ post_deploy_metrics.stdout | from_json }}"
+        
+  handlers:
+    - name: restart_iis
+      ansible.windows.win_shell: |
+        Import-Module WebAdministration
+        Restart-WebAppPool -Name "{{ obt_app_pool }}"
+      listen: "restart iis"
+      
+    - name: clear_cache
+      ansible.windows.win_shell: |
+        $tempPath = "$env:TEMP\*"
+        Remove-Item -Path $tempPath -Recurse -Force -ErrorAction SilentlyContinue
+      listen: "clear cache"
